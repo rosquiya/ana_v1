@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puertas: Control Arduino</title>
+    <script>
+        async function sendCommand() {
+            const command = document.getElementById('command').value;
+
+            if (!['11', '10', '01', '00'].includes(command)) {
+                document.getElementById('response').innerText = 'Comando inválido';
+                return;
+            }
+
+            const response = await fetch('/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command })
+            });
+
+            const data = await response.json();
+            if (Array.isArray(data.response)) {
+                document.getElementById('response').innerText = data.response.join('\n');
+            } else {
+                document.getElementById('response').innerText = data.response || data.error;
+            }
+        }
+
+        async function openConnection() {
+            const response = await fetch('/open', {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+            document.getElementById('response').innerText = data.response || data.error;
+        }
+
+        async function closeConnection() {
+            const response = await fetch('/close', {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+            document.getElementById('response').innerText = data.response || data.error;
+        }
+    </script>
+</head>
+<body>
+    <h1>Controlar Arduino</h1>
+    <button onclick="openConnection()">Abrir Conexión</button>
+    <button onclick="closeConnection()">Cerrar Conexión</button>
+    <br><br>
+    <label for="command">Comando:</label>
+    <input type="text" id="command" maxlength="2">
+    <button onclick="sendCommand()">Enviar Comando</button>
+    <p id="response"></p>
+</body>
+</html>
+
